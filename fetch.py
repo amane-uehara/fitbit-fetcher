@@ -25,10 +25,9 @@ def main(args):
   client_secret = client_list[1]
 
   # ---------- READ TOKEN FILE ----------
-  global my_token_file
-  my_token_file = args[1]
-  if not os.path.exists(my_token_file) :
-    print("invalid token_file: " + my_token_file, file=sys.stderr)
+  token_file = args[1]
+  if not os.path.exists(token_file) :
+    print("invalid token_file: " + token_file, file=sys.stderr)
     return
 
   # ---------- READ SAVE PATH ----------
@@ -44,22 +43,23 @@ def main(args):
     return
   yyyy_mm_dd = yyyymmdd[0:4] + '-' + yyyymmdd[4:6] + '-' + yyyymmdd[6:8]
 
-  print("bgn:" + str(datetime.datetime.now()) + " client_file:" + args[0] + " token_file:" + my_token_file + " yyyymmdd:" + yyyymmdd + " savedir:" + save_root, file=sys.stderr)
+  print("bgn:" + str(datetime.datetime.now()) + " client_file:" + args[0] + " token_file:" + token_file + " yyyymmdd:" + yyyymmdd + " savedir:" + save_root, file=sys.stderr)
 
   # ---------- INITIALIZE FITBIT ----------
-  tokens = open(my_token_file).read()
-  with open(my_token_file, 'r') as f:
+  tokens = open(token_file).read()
+  with open(token_file, 'r') as f:
     output = f.read()
   token_dict = literal_eval(tokens)
   access_token = token_dict['access_token']
   refresh_token = token_dict['refresh_token']
+  callback = lambda t : updateToken(t, token_file)
 
   client = fitbit.Fitbit(
     client_id
     , client_secret
     , access_token = access_token
     , refresh_token = refresh_token
-    , refresh_cb = updateToken
+    , refresh_cb = callback
   )
 
   # ---------- INTRA_TIME_SERIES ----------
@@ -130,14 +130,13 @@ def main(args):
     f.write(str(response.json()))
     f.close()
 
-  print("end:" + str(datetime.datetime.now()) + " client_file:" + args[0] + " token_file:" + my_token_file + " yyyymmdd:" + yyyymmdd + " savedir:" + save_root, file=sys.stderr)
+  print("end:" + str(datetime.datetime.now()) + " client_file:" + args[0] + " token_file:" + token_file + " yyyymmdd:" + yyyymmdd + " savedir:" + save_root, file=sys.stderr)
 
 
 
 
-def updateToken(token):
-  global my_token_file
-  f = open(my_token_file, 'w')
+def updateToken(token, token_file):
+  f = open(token_file, 'w')
   f.write(str(token))
   f.close()
   return
