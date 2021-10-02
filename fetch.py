@@ -9,46 +9,47 @@ import requests
 import importlib
 fitbit = importlib.import_module("fitbit", ".python-fitbit")
 
-global token_file
-
 def main(args):
   if len(args) != 4 :
-    print("USAGE :: python3 fetch_json_files.py client_file token_file /path/to/save_dir yyyymmdd" )
+    print("USAGE :: python3 fetch_json_files.py client_file token_file /path/to/save_dir yyyymmdd", file=sys.stderr)
     return
 
   # ---------- READ CLIENT FILE ----------
   if not os.path.exists(args[0]) :
-    print("invalid client_file: " + save_root)
+    print("invalid client_file: " + args[0], file=sys.stderr)
     return
 
-  with open(args[0], 'r') as client_file:
-    client_list = client_file.read().split("\n")
+  with open(args[0], 'r') as f:
+    client_list = f.read().split("\n")
   client_id     = client_list[0]
   client_secret = client_list[1]
 
   # ---------- READ TOKEN FILE ----------
-  if not os.path.exists(args[1]) :
-    print("invalid token_file: " + save_root)
+  global my_token_file
+  my_token_file = args[1]
+  if not os.path.exists(my_token_file) :
+    print("invalid token_file: " + my_token_file, file=sys.stderr)
     return
-  token_file = args[1]
 
   # ---------- READ SAVE PATH ----------
   save_root = args[2]
   if not os.path.exists(save_root) :
-    print("invalid save_root_path: " + save_root)
+    print("invalid save_root_path: " + save_root, file=sys.stderr)
     return
 
   # ---------- READ YYYYMMDD ----------
   yyyymmdd = args[3]
   if int(yyyymmdd) < 10000000 or 30000000 < int(yyyymmdd) :
-    print("invalid yyyymmdd: " + yyyymmdd)
+    print("invalid yyyymmdd: " + yyyymmdd, file=sys.stderr)
     return
   yyyy_mm_dd = yyyymmdd[0:4] + '-' + yyyymmdd[4:6] + '-' + yyyymmdd[6:8]
 
-  print("bgn:" + str(datetime.datetime.now()) + " yyyymmdd:" + yyyymmdd + " savedir:" + save_root)
+  print("bgn:" + str(datetime.datetime.now()) + " client_file:" + args[0] + " token_file:" + my_token_file + " yyyymmdd:" + yyyymmdd + " savedir:" + save_root, file=sys.stderr)
 
   # ---------- INITIALIZE FITBIT ----------
-  tokens = open(token_file).read()
+  tokens = open(my_token_file).read()
+  with open(my_token_file, 'r') as f:
+    output = f.read()
   token_dict = literal_eval(tokens)
   access_token = token_dict['access_token']
   refresh_token = token_dict['refresh_token']
@@ -122,20 +123,21 @@ def main(args):
   response = requests.get(url, headers=headers)
 
   if "Too" in str(response.json()):
-    print("fetch sleep_day failed")
+    print("fetch sleep_day failed", file=sys.stderr)
 
   else:
     f = open(save_path_sleep_day + '/' + yyyymmdd + '.json', 'w')
     f.write(str(response.json()))
     f.close()
 
-  print("end:" + str(datetime.datetime.now()) + " yyyymmdd:" + yyyymmdd + " savedir:" + save_root)
+  print("end:" + str(datetime.datetime.now()) + " client_file:" + args[0] + " token_file:" + my_token_file + " yyyymmdd:" + yyyymmdd + " savedir:" + save_root, file=sys.stderr)
 
 
 
 
 def updateToken(token):
-  f = open(token_file, 'w')
+  global my_token_file
+  f = open(my_token_file, 'w')
   f.write(str(token))
   f.close()
   return
