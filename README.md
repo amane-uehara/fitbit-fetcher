@@ -25,10 +25,17 @@ Linux環境にデータをバックアップするための環境を構築する
 <https://dev.fitbit.com/apps/details/@@@ClientId@@@>
 に飛ぶ。
 
-* OAuth 2.0 Client ID
-* Client Secret
+* OAuth 2.0 Client ID (説明例として`123aaa`とする)
+* Client Secret (説明例として`abcdefghijklmnopqrstuv1234567890`とする)
 
-をメモ。
+の項目を確認し
+
+```
+123456
+abcdefghijklmnopqrstuv1234567890
+```
+
+という2行のテキスト形式にして、カレントディレクトリに`client.txt`という名前で保存する。
 
 OAuth2.0周りの準備
 ------------------
@@ -54,8 +61,13 @@ URLバーの
 の`@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@`をコピーする。
 `1A Get Code`に貼り付ける
 
-CURLコマンドが出るのでCUIで実行。
-JSON形式で結果が得られるのでコピーしてメモ
+CURLコマンドが出るのでCUIで実行すると、以下のようなJSON形式の結果が得られる。
+
+```
+{'access_token': '*********************************************************************************************************************************************************************************************************************************************************************************', 'expires_in': 28800, 'refresh_token': '****************************************************************', 'scope': ['profile', 'weight', 'activity', 'social', 'nutrition', 'location', 'settings', 'sleep', 'heartrate'], 'token_type': 'Bearer', 'user_id': '******', 'expires_at': **********.*****}
+```
+
+これを`token.json`という名前でカレントディレクトリに保存する。
 
 `2 Parse response`
 に貼り付ける
@@ -69,35 +81,25 @@ CURLコマンドが出るので、CUIで実行。最後の部分のURLを
 <https://api.fitbit.com/1/user/-/activities/heart/date/today/1d/1sec/time/00:00/00:01.json>
 などに変更してうまくいくことを確かめる。
 
-`token.json`の作成
---------------
-
-さっきメモしたJSONテキストを`token.json`という名前のファイルに保存する。
-形式の詳細は`sample_token.json`を参照。
-
-`client.txt`の作成
---------------
-
-さっきメモしたClient IDとClient Secretを
-
-```python
-ClientID
-ClientSecret
-```
-
-という2行のテキスト形式で、`client.txt`という名前のファイルに保存する。
-形式の詳細は`sample_client.txt`を参照。
-
 fitbit公式のpythonリポジトリの導入
 ----------------------------------
 
-以下のコマンドを実行
+このリポジトリ <https://github.com/amane-uehara/fitbit-fetcher>  を`git clone`して
 
 ```sh
 $ sh install.sh
 ```
 
-以下のようになればOK
+を実行する。
+無事に終了すると`python-fitbit`というディレクトリがダウンロードされる。
+
+また先ほど作成した2つのファイル
+
+* `client.txt`
+* `token.json`
+
+をカレントディレクトリに持ってくる。
+最終的に以下のファイル構成になればOK。
 
 ```
 $ ls
@@ -106,22 +108,17 @@ client.txt
 fetch.py
 install.sh
 python-fitbit
-sample_client.txt
-sample_token.json
 token.json
 ```
 
 データの取得
 --------
 
-UNIX-likeなシェルがあれば
+以下のコマンドで、`/path/to/save/dir`以下に2021年1月1日のFitbitのデータが保存される。
 
 ```sh
 $ python3 fetch.py client.txt token.json /path/to/save/dir 20210101
 ```
-
-とすれば、`/path/to/save/dir`以下に2021年1月1日のFitbitのデータが保存される。
-
 
 LICENSE
 -------
