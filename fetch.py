@@ -2,34 +2,50 @@
 import sys
 import os
 import datetime
-import fitbit
 from ast import literal_eval
 import requests
 
+# import fitbit
+import importlib
+fitbit = importlib.import_module("fitbit", ".python-fitbit")
+
+global token_file
+
 def main(args):
-  # ---------- PARSE ARGS ----------
-  if len(args) != 5 :
-    print("USAGE :: python3 fetch_json_files.py /path/to/save_dir yyyymmdd client_id client_secret /path/to/token.txt" )
+  if len(args) != 4 :
+    print("USAGE :: python3 fetch_json_files.py client_file token_file /path/to/save_dir yyyymmdd" )
     return
 
-  save_root = args[0]
+  # ---------- READ CLIENT FILE ----------
+  if not os.path.exists(args[0]) :
+    print("invalid client_file: " + save_root)
+    return
+
+  with open(args[0], 'r') as client_file:
+    client_list = client_file.read().split("\n")
+  client_id     = client_list[0]
+  client_secret = client_list[1]
+
+  # ---------- READ TOKEN FILE ----------
+  if not os.path.exists(args[1]) :
+    print("invalid token_file: " + save_root)
+    return
+  token_file = args[1]
+
+  # ---------- READ SAVE PATH ----------
+  save_root = args[2]
   if not os.path.exists(save_root) :
     print("invalid save_root_path: " + save_root)
     return
 
-  yyyymmdd  = args[1]
+  # ---------- READ YYYYMMDD ----------
+  yyyymmdd = args[3]
   if int(yyyymmdd) < 10000000 or 30000000 < int(yyyymmdd) :
     print("invalid yyyymmdd: " + yyyymmdd)
     return
   yyyy_mm_dd = yyyymmdd[0:4] + '-' + yyyymmdd[4:6] + '-' + yyyymmdd[6:8]
 
-  client_id     = args[2]
-  client_secret = args[3]
-
-  token_file    = args[4]
-  if not os.path.exists(token_file) :
-    print("token file <<<" + token_file + ">>> not found")
-    return
+  print("bgn:" + str(datetime.datetime.now()) + " yyyymmdd:" + yyyymmdd + " savedir:" + save_root)
 
   # ---------- INITIALIZE FITBIT ----------
   tokens = open(token_file).read()
@@ -112,6 +128,8 @@ def main(args):
     f = open(save_path_sleep_day + '/' + yyyymmdd + '.json', 'w')
     f.write(str(response.json()))
     f.close()
+
+  print("end:" + str(datetime.datetime.now()) + " yyyymmdd:" + yyyymmdd + " savedir:" + save_root)
 
 
 
