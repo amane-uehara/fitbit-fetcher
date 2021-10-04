@@ -2,6 +2,8 @@
 import sys
 import os
 import datetime
+import json
+
 from ast import literal_eval
 import requests
 
@@ -100,7 +102,7 @@ def main(args):
     json_data = client.intraday_time_series(item['resource'], base_date=yyyy_mm_dd, detail_level=item['detail_level'])
     json_filename = item['save_path'] + '/' + yyyymmdd + '.json'
     f = open(json_filename, 'w')
-    f.write(str(json_data))
+    f.write(json.dumps(json_data, separators=(',', ':')))
     f.close()
 
   # ---------- SLEEP MIN ----------
@@ -110,7 +112,7 @@ def main(args):
 
   json_data = client.sleep(date=yyyy_mm_dd)
   f = open(save_path_sleep_min + '/' + yyyymmdd + '.json', 'w')
-  f.write(str(json_data))
+  f.write(json.dumps(json_data, separators=(',', ':')))
   f.close()
 
   # ---------- SLEEP DAY ----------
@@ -127,7 +129,7 @@ def main(args):
 
   else:
     f = open(save_path_sleep_day + '/' + yyyymmdd + '.json', 'w')
-    f.write(str(response.json()))
+    f.write(json.dumps(response.json(), separators=(',', ':')))
     f.close()
 
   print("end:" + str(datetime.datetime.now()) + " client_file:" + args[0] + " token_file:" + token_file + " yyyymmdd:" + yyyymmdd + " savedir:" + save_root, file=sys.stderr)
