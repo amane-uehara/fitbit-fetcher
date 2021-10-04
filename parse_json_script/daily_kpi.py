@@ -52,10 +52,15 @@ def main(args):
 
   filename = os.path.join(raw_root, 'sleep_1m', yyyymmdd + '.json')
   data = read_json_file(filename)
+
   for total in ['totalSleepRecords', 'totalTimeInBed', 'totalMinutesAsleep']:
     item_dict['sleep_' + total] = int(data['summary'][total])
+
   for stage in ['deep', 'light', 'rem', 'wake']:
-    item_dict['sleep_' + stage] = int(data['summary']['stages'][stage])
+    if 'stages' in data['summary']:
+      item_dict['sleep_' + stage] = int(data['summary']['stages'][stage])
+    else:
+      item_dict['sleep_' + stage] = ''
 
   print(json.dumps(item_dict, separators=(',', ':')))
 
