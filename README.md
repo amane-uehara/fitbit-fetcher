@@ -107,6 +107,7 @@ README.md
 client.txt
 fetch.py
 install.sh
+parse_json_script
 python-fitbit
 token.json
 ```
