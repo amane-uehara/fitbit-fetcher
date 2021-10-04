@@ -47,7 +47,7 @@ def main(args):
   for d in data['activities-heart'][0]['value']['heartRateZones']:
     zone = d['name'].replace(' ','')
     for metric in ['caloriesOut', 'max', 'min', 'minutes']:
-      key = ('heart_' + zone + '_' + metric).lower()
+      key = 'heart_' + zone + '_' + metric
       item_dict[key] = int(d[metric])
 
   filename = os.path.join(raw_root, 'sleep_1m', yyyymmdd + '.json')
